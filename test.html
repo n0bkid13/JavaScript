@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nikola</title>
+    <script type="text/javascript">
+
+
+    </script>
+</head>
+<body>
+    <p>
+        Od:<input type="date" id="fromDate">
+        Do:<input type="date" id="toDate">
+        Broj na sobi:<input type="text" style="width: 100px" value="1" id="rooms">
+        <input type="button" onclick="filterHotels()" value="Prebaraj">
+    </p>
+    <p>
+        <table border="1" id="hotels">
+            <thead>
+                <tr>
+                    <th>Ime</th>
+                    <th>Od</th>
+                    <th>Do</th>
+                    <th>Sobi</th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </p>
+</body>
+<script type="text/javascript">
+    let fromDate = document.getElementById("fromDate");
+    let toDate = document.getElementById("toDate");
+    let date = new Date(Date.now());
+    fromDate.valueAsDate = date;
+    toDate.valueAsDate = new Date(date.getFullYear(), date.getMonth(), date.getDay() + 6);
+
+    let str = "{\"hoteli\":[{\"ime\":\"Monastero\",\"od\":\"31.8.2021\",\"do\":\"11.9.2021\",\"sobi\":3},{\"ime\":\"Hotel 71\",\"od\":\"1.9.2021\",\"do\":\"4.9.2021\",\"sobi\":1},{\"ime\":\"RAAS Jodhpur\",\"od\":\"28.8.2021\",\"do\":\"10.10.2021\",\"sobi\":10},{\"ime\":\"Archer Hotel \",\"od\":\"1.8.2021\",\"do\":\"1.10.2021\",\"sobi\":0},{\"ime\":\"The Langham Huntington\",\"od\":\"3.8.2021\",\"do\":\"3.9.2021\",\"sobi\":5}]}";
+
+    let hotels = JSON.parse(str);
+
+    function checkDates(hotelFromDate, hotelToDate){
+        let dtFrom = document.getElementById("fromDate").valueAsDate;
+        let dtTo = document.getElementById("toDate").valueAsDate;
+
+        let hotelFrom = hotelFromDate.split("."), hotelTo = hotelToDate.split(".");
+        let clientFrom = [dtFrom.getDay(), dtFrom.getMonth(), dtFrom.getFullYear()];
+        let clientTo = [dtTo.getDay(), dtTo.getMonth(), dtTo.getFullYear()]
+
+        if(before(hotelFrom, clientFrom) && before(clientTo, hotelTo)){
+            return true;
+        }
+
+        return false;
+    }
+
+    function before(dt1, dt2){
+        if(dt1[2] <= dt2[2]){
+            if(dt1[1] < dt2[1]){
+                return true
+            }else if (dt1[1] == dt2[1]){
+                return dt1[0] <= dt2[0];
+            }
+        }
+        return false;
+    }
+
+    function filterHotels(){
+        let table = document.getElementById("hotels");
+
+        table.innerHTML = "<thead><tr><th>"+ "Ime" + "</th><th>" + "Od" + "</th><th>"
+            + "Do"+ "</th><th>" + "Sobi" + "</th><th></th></tr></thead>";
+
+        for(let i = 0 ; i < hotels["hoteli"].length; ++i){
+            if(checkDates(hotels["hoteli"][i].od, hotels["hoteli"][i].do)){
+                addHotel(hotels["hoteli"][i]);
+            }
+        }
+    }
+
+    function roomLess(obj){
+        let requiredRooms = document.getElementById("rooms").innerText;
+        obj.sobi = obj.sobi - requiredRooms;
+
+    }
+
+    function addHotel(obj){
+        let table = document.getElementById("hotels");
+        let row = document.createElement("tr");
+
+        let data = document.createElement("td");
+        data.appendChild(document.createTextNode(obj.ime));
+        row.appendChild(data);
+
+        data = document.createElement("td");
+        data.appendChild(document.createTextNode(obj.od));
+        row.appendChild(data);
+
+        data = document.createElement("td");
+        data.appendChild(document.createTextNode(obj.do));
+        row.appendChild(data);
+
+        data = document.createElement("td");
+        data.appendChild(document.createTextNode(obj.sobi));
+        row.appendChild(data);
+
+        data = document.createElement("td");
+        let btn = document.createElement("button");
+        btn.innerText = "Rezerviraj";
+        btn.onclick = roomLess(obj);
+        data.appendChild(btn);
+        row.appendChild(data);
+
+        table.appendChild(row);
+    }
+
+</script>
+</html>
